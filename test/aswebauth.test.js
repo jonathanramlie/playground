@@ -6,6 +6,7 @@ const {
   COOKIE_NAME,
   buildNonceCookie,
   buildStartResponse,
+  normalizeDelayMs,
   parseCookies,
   readNonceFromCookieHeader,
   renderCheckPage,
@@ -50,6 +51,31 @@ test('buildStartResponse sets nonce cookie and custom-scheme redirect', () => {
   assert.equal(response.headers.location, `${CALLBACK_SCHEME}://callback?nonce=abc-123`);
   assert.equal(response.headers['cache-control'], 'no-store');
   assert.equal(response.headers['set-cookie'].startsWith(`${COOKIE_NAME}=abc-123;`), true);
+});
+
+test('buildStartResponse can delay before custom-scheme redirect', () => {
+  const response = buildStartResponse({
+    nonce: 'abc-123',
+    secure: true,
+    delayMs: 2000,
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.headers.location, undefined);
+  assert.equal(response.headers['content-type'], 'text/html; charset=utf-8');
+  assert.equal(response.headers['cache-control'], 'no-store');
+  assert.equal(response.headers['set-cookie'].startsWith(`${COOKIE_NAME}=abc-123;`), true);
+  assert.match(response.body, /2000/);
+  assert.match(response.body, /Continue to app/);
+  assert.match(response.body, new RegExp(`${CALLBACK_SCHEME}://callback\\?nonce=abc-123`));
+});
+
+test('normalizeDelayMs clamps invalid and excessive values', () => {
+  assert.equal(normalizeDelayMs(undefined), 0);
+  assert.equal(normalizeDelayMs('nope'), 0);
+  assert.equal(normalizeDelayMs('-1'), 0);
+  assert.equal(normalizeDelayMs('2000'), 2000);
+  assert.equal(normalizeDelayMs('99999'), 10000);
 });
 
 test('renderCheckPage reports a nonce match', () => {

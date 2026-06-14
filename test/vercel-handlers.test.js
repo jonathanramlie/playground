@@ -15,6 +15,25 @@ function createResponse() {
   };
 }
 
+test('landing handler renders https check URL for Vercel host', () => {
+  const handler = require('../api/aswebauth');
+  const res = createResponse();
+
+  handler(
+    {
+      headers: {
+        host: 'playground-211p.vercel.app',
+        'x-forwarded-proto': 'http',
+      },
+    },
+    res,
+  );
+
+  assert.equal(res.statusCode, 200);
+  assert.match(res.body, /https:\/\/playground-211p\.vercel\.app\/aswebauth\/check\?expected=/);
+  assert.doesNotMatch(res.body, /http:\/\/playground-211p\.vercel\.app\/aswebauth\/check\?expected=/);
+});
+
 test('start handler redirects to callback and sets nonce cookie', () => {
   const handler = require('../api/aswebauth/start');
   const res = createResponse();
@@ -32,6 +51,25 @@ test('start handler redirects to callback and sets nonce cookie', () => {
   assert.match(res.headers.location, /^playgroundauth:\/\/callback\?nonce=/);
   assert.match(res.headers['set-cookie'], /^nonce=/);
   assert.match(res.headers['set-cookie'], /Secure/);
+});
+
+test('start handler renders delayed page when delayMs query is provided', () => {
+  const handler = require('../api/aswebauth/start');
+  const res = createResponse();
+
+  handler(
+    {
+      query: { delayMs: '2000' },
+      headers: {},
+    },
+    res,
+  );
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.headers['content-type'], 'text/html; charset=utf-8');
+  assert.match(res.headers['set-cookie'], /^nonce=/);
+  assert.match(res.body, /Continue to app/);
+  assert.match(res.body, /2000/);
 });
 
 test('check handler renders missing cookie state', () => {

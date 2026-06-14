@@ -54,9 +54,12 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/aswebauth/start') {
-      const response = buildStartResponse({ secure: isSecureRequest(req) });
+      const response = buildStartResponse({
+        secure: isSecureRequest(req),
+        delayMs: url.searchParams.get('delayMs'),
+      });
       res.writeHead(response.statusCode, response.headers);
-      res.end('Redirecting to app callback.');
+      res.end(response.body);
       return;
     }
 

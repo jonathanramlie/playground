@@ -61,15 +61,52 @@ function buildNonceCookie(nonce, { secure } = { secure: true }) {
   return parts.join('; ');
 }
 
-function buildStartResponse({ nonce = createNonce(), secure = true } = {}) {
+function buildCallbackUrl(nonce) {
+  return `${CALLBACK_SCHEME}://callback?nonce=${encodeURIComponent(nonce)}`;
+}
+
+function normalizeDelayMs(value) {
+  const delayMs = Number.parseInt(String(value ?? ''), 10);
+
+  if (!Number.isFinite(delayMs) || delayMs <= 0) {
+    return 0;
+  }
+
+  return Math.min(delayMs, 10000);
+}
+
+function scriptJson(value) {
+  return JSON.stringify(value).replaceAll('<', '\\u003c');
+}
+
+function buildStartResponse({ nonce = createNonce(), secure = true, delayMs = 0 } = {}) {
+  const normalizedDelayMs = normalizeDelayMs(delayMs);
+  const callbackUrl = buildCallbackUrl(nonce);
+  const baseHeaders = {
+    'set-cookie': buildNonceCookie(nonce, { secure }),
+    'cache-control': 'no-store',
+  };
+
+  if (normalizedDelayMs > 0) {
+    return {
+      nonce,
+      statusCode: 200,
+      headers: {
+        ...baseHeaders,
+        'content-type': 'text/html; charset=utf-8',
+      },
+      body: renderDelayedStartPage({ callbackUrl, delayMs: normalizedDelayMs }),
+    };
+  }
+
   return {
     nonce,
     statusCode: 302,
     headers: {
-      location: `${CALLBACK_SCHEME}://callback?nonce=${encodeURIComponent(nonce)}`,
-      'set-cookie': buildNonceCookie(nonce, { secure }),
-      'cache-control': 'no-store',
+      ...baseHeaders,
+      location: callbackUrl,
     },
+    body: 'Redirecting to app callback.',
   };
 }
 
@@ -100,13 +137,30 @@ function page(title, body) {
 </html>`;
 }
 
-function renderLandingPage({ origin = 'https://playground.natum.dev' } = {}) {
+function renderLandingPage({ origin = 'https://playground-211p.vercel.app' } = {}) {
   return page(
     'ASWebAuthenticationSession Cookie POC',
     `<h1>ASWebAuthenticationSession Cookie POC</h1>
 <p>This page starts a flow that sets a server-side <code>${COOKIE_NAME}=&lt;uuid&gt;</code> cookie, redirects to <code>${CALLBACK_SCHEME}://callback</code>, and lets the iOS app open the check page in the external browser.</p>
-<p><a href="/aswebauth/start">Start auth-cookie flow</a></p>
+<p><a href="/aswebauth/start?delayMs=2000">Start auth-cookie flow with 2s delay</a></p>
+<p><a href="/aswebauth/start">Start auth-cookie flow without delay</a></p>
 <p>Check endpoint format: <code>${escapeHtml(origin)}/aswebauth/check?expected=&lt;nonce&gt;</code></p>`,
+  );
+}
+
+function renderDelayedStartPage({ callbackUrl, delayMs }) {
+  return page(
+    'Returning to app',
+    `<h1>Cookie set</h1>
+<p>The <code>${COOKIE_NAME}</code> cookie has been set. This page will return to the app after <strong>${delayMs}ms</strong>.</p>
+<p>You can also tap the button below to return immediately. Tapping may help test whether first-party user interaction changes browser cookie behavior.</p>
+<p><a id="continueLink" href="${escapeHtml(callbackUrl)}" role="button">Continue to app</a></p>
+<script>
+  const callbackUrl = ${scriptJson(callbackUrl)};
+  window.setTimeout(() => {
+    window.location.href = callbackUrl;
+  }, ${delayMs});
+</script>`,
   );
 }
 
@@ -145,6 +199,7 @@ module.exports = {
   buildStartResponse,
   createNonce,
   isSecureRequest,
+  normalizeDelayMs,
   parseCookies,
   readNonceFromCookieHeader,
   renderCheckPage,

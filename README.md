@@ -21,14 +21,15 @@ Local HTTP intentionally omits the `Secure` cookie attribute for `/aswebauth/sta
 Deploy this project to the domain:
 
 ```text
-https://playground.natum.dev
+https://playground-211p.vercel.app
 ```
 
 The clean POC URLs are:
 
-- https://playground.natum.dev/aswebauth
-- https://playground.natum.dev/aswebauth/start
-- https://playground.natum.dev/aswebauth/check?expected=<nonce>
+- https://playground-211p.vercel.app/aswebauth
+- https://playground-211p.vercel.app/aswebauth/start
+- https://playground-211p.vercel.app/aswebauth/start?delayMs=2000
+- https://playground-211p.vercel.app/aswebauth/check?expected=<nonce>
 
 ## ASWebAuthenticationSession cookie POC
 
@@ -38,6 +39,8 @@ The clean POC URLs are:
 Set-Cookie: nonce=<uuid>; Path=/; Max-Age=600; HttpOnly; SameSite=Lax; Secure
 Location: playgroundauth://callback?nonce=<uuid>
 ```
+
+`/aswebauth/start?delayMs=2000` sets the cookie, renders a waiting page with a **Continue to app** button, and auto-redirects to the callback after 2 seconds. This is useful for testing whether timing or first-party user interaction changes the result.
 
 `/aswebauth/check?expected=<uuid>` renders whether the external browser sent the matching `nonce` cookie.
 
