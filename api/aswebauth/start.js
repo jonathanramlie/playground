@@ -9,6 +9,7 @@ module.exports = function handler(req, res) {
   const response = buildStartResponse({
     secure: true,
     delayMs: firstQueryValue(req.query, 'delayMs'),
+    manualOnly: firstQueryValue(req.query, 'autoRedirect') === '0',
   });
 
   res.statusCode = response.statusCode;

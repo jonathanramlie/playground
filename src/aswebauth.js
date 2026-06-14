@@ -79,7 +79,7 @@ function scriptJson(value) {
   return JSON.stringify(value).replaceAll('<', '\\u003c');
 }
 
-function buildStartResponse({ nonce = createNonce(), secure = true, delayMs = 0 } = {}) {
+function buildStartResponse({ nonce = createNonce(), secure = true, delayMs = 0, manualOnly = false } = {}) {
   const normalizedDelayMs = normalizeDelayMs(delayMs);
   const callbackUrl = buildCallbackUrl(nonce);
   const baseHeaders = {
@@ -87,7 +87,7 @@ function buildStartResponse({ nonce = createNonce(), secure = true, delayMs = 0 
     'cache-control': 'no-store',
   };
 
-  if (normalizedDelayMs > 0) {
+  if (manualOnly || normalizedDelayMs > 0) {
     return {
       nonce,
       statusCode: 200,
@@ -95,7 +95,11 @@ function buildStartResponse({ nonce = createNonce(), secure = true, delayMs = 0 
         ...baseHeaders,
         'content-type': 'text/html; charset=utf-8',
       },
-      body: renderDelayedStartPage({ callbackUrl, delayMs: normalizedDelayMs }),
+      body: renderDelayedStartPage({
+        callbackUrl,
+        delayMs: normalizedDelayMs,
+        manualOnly,
+      }),
     };
   }
 
@@ -143,24 +147,32 @@ function renderLandingPage({ origin = 'https://playground-211p.vercel.app' } = {
     `<h1>ASWebAuthenticationSession Cookie POC</h1>
 <p>This page starts a flow that sets a server-side <code>${COOKIE_NAME}=&lt;uuid&gt;</code> cookie, redirects to <code>${CALLBACK_SCHEME}://callback</code>, and lets the iOS app open the check page in the external browser.</p>
 <p><a href="/aswebauth/start?delayMs=2000">Start auth-cookie flow with 2s delay</a></p>
+<p><a href="/aswebauth/start?autoRedirect=0">Start auth-cookie flow with manual return only</a></p>
 <p><a href="/aswebauth/start">Start auth-cookie flow without delay</a></p>
 <p>Check endpoint format: <code>${escapeHtml(origin)}/aswebauth/check?expected=&lt;nonce&gt;</code></p>`,
   );
 }
 
-function renderDelayedStartPage({ callbackUrl, delayMs }) {
-  return page(
-    'Returning to app',
-    `<h1>Cookie set</h1>
-<p>The <code>${COOKIE_NAME}</code> cookie has been set. This page will return to the app after <strong>${delayMs}ms</strong>.</p>
-<p>You can also tap the button below to return immediately. Tapping may help test whether first-party user interaction changes browser cookie behavior.</p>
-<p><a id="continueLink" href="${escapeHtml(callbackUrl)}" role="button">Continue to app</a></p>
-<script>
+function renderDelayedStartPage({ callbackUrl, delayMs, manualOnly = false }) {
+  const redirectCopy = manualOnly
+    ? 'Automatic redirect is disabled. Tap the button below when you are ready to return to the app.'
+    : `This page will return to the app after <strong>${delayMs}ms</strong>.`;
+  const autoRedirectScript = manualOnly
+    ? ''
+    : `<script>
   const callbackUrl = ${scriptJson(callbackUrl)};
   window.setTimeout(() => {
     window.location.href = callbackUrl;
   }, ${delayMs});
-</script>`,
+</script>`;
+
+  return page(
+    'Returning to app',
+    `<h1>Cookie set</h1>
+<p>The <code>${COOKIE_NAME}</code> cookie has been set. ${redirectCopy}</p>
+<p>Tapping the button may help test whether first-party user interaction changes browser cookie behavior.</p>
+<p><a id="continueLink" href="${escapeHtml(callbackUrl)}" role="button">Continue to app</a></p>
+${autoRedirectScript}`,
   );
 }
 

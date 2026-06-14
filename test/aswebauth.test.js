@@ -70,6 +70,22 @@ test('buildStartResponse can delay before custom-scheme redirect', () => {
   assert.match(response.body, new RegExp(`${CALLBACK_SCHEME}://callback\\?nonce=abc-123`));
 });
 
+test('buildStartResponse can disable automated redirect', () => {
+  const response = buildStartResponse({
+    nonce: 'manual-123',
+    secure: true,
+    manualOnly: true,
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.headers.location, undefined);
+  assert.equal(response.headers['content-type'], 'text/html; charset=utf-8');
+  assert.match(response.body, /Automatic redirect is disabled/);
+  assert.match(response.body, /Continue to app/);
+  assert.doesNotMatch(response.body, /window.setTimeout/);
+  assert.match(response.body, new RegExp(`${CALLBACK_SCHEME}://callback\\?nonce=manual-123`));
+});
+
 test('normalizeDelayMs clamps invalid and excessive values', () => {
   assert.equal(normalizeDelayMs(undefined), 0);
   assert.equal(normalizeDelayMs('nope'), 0);

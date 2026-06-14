@@ -29,6 +29,7 @@ The clean POC URLs are:
 - https://playground-211p.vercel.app/aswebauth
 - https://playground-211p.vercel.app/aswebauth/start
 - https://playground-211p.vercel.app/aswebauth/start?delayMs=2000
+- https://playground-211p.vercel.app/aswebauth/start?autoRedirect=0
 - https://playground-211p.vercel.app/aswebauth/check?expected=<nonce>
 
 ## ASWebAuthenticationSession cookie POC
@@ -40,7 +41,9 @@ Set-Cookie: nonce=<uuid>; Path=/; Max-Age=600; HttpOnly; SameSite=Lax; Secure
 Location: playgroundauth://callback?nonce=<uuid>
 ```
 
-`/aswebauth/start?delayMs=2000` sets the cookie, renders a waiting page with a **Continue to app** button, and auto-redirects to the callback after 2 seconds. This is useful for testing whether timing or first-party user interaction changes the result.
+`/aswebauth/start?delayMs=2000` sets the cookie, renders a waiting page with a **Continue to app** button, and auto-redirects to the callback after 2 seconds.
+
+`/aswebauth/start?autoRedirect=0` sets the cookie and renders the same **Continue to app** button, but disables automatic redirect. This is useful for testing whether timing or first-party user interaction changes the result.
 
 `/aswebauth/check?expected=<uuid>` renders whether the external browser sent the matching `nonce` cookie.
 

@@ -57,6 +57,7 @@ const server = http.createServer(async (req, res) => {
       const response = buildStartResponse({
         secure: isSecureRequest(req),
         delayMs: url.searchParams.get('delayMs'),
+        manualOnly: url.searchParams.get('autoRedirect') === '0',
       });
       res.writeHead(response.statusCode, response.headers);
       res.end(response.body);

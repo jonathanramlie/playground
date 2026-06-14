@@ -72,6 +72,26 @@ test('start handler renders delayed page when delayMs query is provided', () => 
   assert.match(res.body, /2000/);
 });
 
+test('start handler renders manual-only page when autoRedirect is disabled', () => {
+  const handler = require('../api/aswebauth/start');
+  const res = createResponse();
+
+  handler(
+    {
+      query: { autoRedirect: '0' },
+      headers: {},
+    },
+    res,
+  );
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.headers['content-type'], 'text/html; charset=utf-8');
+  assert.match(res.headers['set-cookie'], /^nonce=/);
+  assert.match(res.body, /Automatic redirect is disabled/);
+  assert.match(res.body, /Continue to app/);
+  assert.doesNotMatch(res.body, /window.setTimeout/);
+});
+
 test('check handler renders missing cookie state', () => {
   const handler = require('../api/aswebauth/check');
   const res = createResponse();
