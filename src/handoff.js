@@ -62,6 +62,10 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
+function scriptJson(value) {
+  return JSON.stringify(value).replaceAll('<', '\\u003c');
+}
+
 function parseCookies(cookieHeader = '') {
   return cookieHeader
     .split(';')
@@ -153,6 +157,7 @@ function buildHandoffStartResponse({
   now = Date.now(),
   tx = createTx(),
   origin = DEFAULT_ORIGIN,
+  autoOpen = false,
 } = {}) {
   const pending = createSignedToken(
     {
@@ -164,6 +169,17 @@ function buildHandoffStartResponse({
     secret,
   );
   const appUrl = `${CALLBACK_SCHEME}://handoff/approve?tx=${encodeURIComponent(tx)}&origin=${encodeURIComponent(origin)}`;
+  const autoOpenCopy = autoOpen
+    ? '<p>Attempting to open the app automatically. If iOS blocks the automatic handoff, tap the fallback button below.</p>'
+    : '';
+  const autoOpenScript = autoOpen
+    ? `<script>
+  const appUrl = ${scriptJson(appUrl)};
+  window.setTimeout(() => {
+    window.location.href = appUrl;
+  }, 500);
+</script>`
+    : '';
 
   return {
     tx,
@@ -177,9 +193,11 @@ function buildHandoffStartResponse({
       'Browser-owned handoff',
       `<h1>Browser-owned handoff</h1>
 <p>This Safari/browser page owns a pending transaction. The app can approve it, but the approval can only complete in this browser if the pending cookie matches.</p>
+${autoOpenCopy}
 <p><a role="button" href="${escapeHtml(appUrl)}">Open app to approve</a></p>
 <h2>Debug</h2>
-<pre>browser_tx=${escapeHtml(tx)}</pre>`,
+<pre>browser_tx=${escapeHtml(tx)}</pre>
+${autoOpenScript}`,
     ),
   };
 }

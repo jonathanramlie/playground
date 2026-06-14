@@ -32,6 +32,24 @@ test('handoff start handler sets pending cookie and renders app approval link', 
   assert.match(res.body, /playgroundauth:\/\/handoff\/approve\?tx=/);
 });
 
+test('handoff start handler supports autoOpen mode', () => {
+  const handler = require('../api/handoff/start');
+  const res = createResponse();
+
+  handler(
+    {
+      query: { autoOpen: '1' },
+      headers: { host: 'playground-211p.vercel.app' },
+    },
+    res,
+  );
+
+  assert.equal(res.statusCode, 200);
+  assert.match(res.headers['set-cookie'], /^handoff_pending=/);
+  assert.match(res.body, /Attempting to open the app automatically/);
+  assert.match(res.body, /window.setTimeout/);
+});
+
 test('handoff approve handler returns complete URL', () => {
   const handler = require('../api/handoff/approve');
   const res = createResponse();

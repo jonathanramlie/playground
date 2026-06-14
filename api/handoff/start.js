@@ -2,7 +2,7 @@ const {
   buildHandoffStartResponse,
   getHandoffSecret,
 } = require('../../src/handoff');
-const { getOrigin, writeResponse } = require('./_utils');
+const { firstQueryValue, getOrigin, writeResponse } = require('./_utils');
 
 module.exports = function handler(req, res) {
   writeResponse(
@@ -11,6 +11,7 @@ module.exports = function handler(req, res) {
       secret: getHandoffSecret(),
       secure: true,
       origin: getOrigin(req),
+      autoOpen: firstQueryValue(req.query, 'autoOpen') === '1',
     }),
   );
 };

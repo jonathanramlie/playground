@@ -112,6 +112,7 @@ const server = http.createServer(async (req, res) => {
           secret: getHandoffSecret(),
           secure: isSecureRequest(req),
           origin: url.origin,
+          autoOpen: url.searchParams.get('autoOpen') === '1',
         }),
       );
       return;

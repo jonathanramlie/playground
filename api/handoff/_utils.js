@@ -3,6 +3,11 @@ function getOrigin(req) {
   return `https://${host}`;
 }
 
+function firstQueryValue(query, name) {
+  const value = query && query[name];
+  return Array.isArray(value) ? value[0] : value;
+}
+
 function getBody(req) {
   if (!req.body) {
     return {};
@@ -28,6 +33,7 @@ function writeResponse(res, response) {
 }
 
 module.exports = {
+  firstQueryValue,
   getBody,
   getOrigin,
   writeResponse,

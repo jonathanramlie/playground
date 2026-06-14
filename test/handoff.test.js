@@ -36,6 +36,23 @@ test('buildHandoffStartResponse creates browser-owned pending cookie and app app
   assert.equal(pending.kind, 'handoff_pending');
 });
 
+test('buildHandoffStartResponse can auto-open the app with fallback button', () => {
+  const response = buildHandoffStartResponse({
+    secret,
+    secure: true,
+    now,
+    tx: 'tx-auto',
+    origin: 'https://playground-211p.vercel.app',
+    autoOpen: true,
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.match(response.body, /Attempting to open the app automatically/);
+  assert.match(response.body, /Open app to approve/);
+  assert.match(response.body, /window.setTimeout/);
+  assert.match(response.body, /playgroundauth:\/\/handoff\/approve\?tx=tx-auto/);
+});
+
 test('buildApproveResponse returns an approval-bound complete URL', () => {
   const response = buildApproveResponse({
     secret,

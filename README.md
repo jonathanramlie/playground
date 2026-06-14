@@ -33,6 +33,7 @@ The clean POC URLs are:
 - https://playground-211p.vercel.app/aswebauth/start?autoRedirect=0
 - https://playground-211p.vercel.app/aswebauth/check?expected=<nonce>
 - https://playground-211p.vercel.app/handoff/start
+- https://playground-211p.vercel.app/handoff/start?autoOpen=1
 - https://playground-211p.vercel.app/handoff/complete?approval=<signed-approval>
 - https://playground-211p.vercel.app/handoff/check
 
@@ -63,9 +64,9 @@ This POC avoids a bearer login URL by making Safari/browser own a pending transa
 
 Flow:
 
-1. Safari opens `/handoff/start`.
+1. Safari opens `/handoff/start` or `/handoff/start?autoOpen=1`.
 2. Server sets `handoff_pending=<signed pending tx>` as a browser-owned `HttpOnly` cookie.
-3. Safari shows **Open app to approve**.
+3. Safari shows **Open app to approve**. With `autoOpen=1`, the page also attempts to open the app automatically after 500ms while keeping the button as fallback.
 4. App receives `playgroundauth://handoff/approve?tx=<browser_tx>&origin=<origin>`.
 5. App calls `POST /handoff/approve` with the `tx` and demo native user.
 6. Server returns `/handoff/complete?approval=<signed approval>`.
