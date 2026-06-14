@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/aswebauth", "destination": "/api/aswebauth" },
+    { "source": "/aswebauth/start", "destination": "/api/aswebauth/start" },
+    { "source": "/aswebauth/check", "destination": "/api/aswebauth/check" }
+  ]
+}

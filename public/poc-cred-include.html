@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PoC Credentials Include</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      main {
+        box-sizing: border-box;
+        width: min(960px, 100%);
+        margin: 0 auto;
+        padding: 32px 20px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        letter-spacing: 0;
+      }
+
+      button {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid ButtonBorder;
+        border-radius: 6px;
+        background: ButtonFace;
+        color: ButtonText;
+        cursor: pointer;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 8px 16px;
+        margin: 20px 0;
+      }
+
+      dt {
+        font-weight: 600;
+      }
+
+      dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+
+      pre {
+        overflow: auto;
+        min-height: 160px;
+        padding: 16px;
+        border: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+        border-radius: 8px;
+        background: color-mix(in srgb, CanvasText 5%, transparent);
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PoC Credentials Include</h1>
+      <button id="runFetch" type="button">Run fetch</button>
+      <button id="runFetchWithHeaders" type="button">
+        Run fetch with headers
+      </button>
+
+      <dl>
+        <dt>Endpoint</dt>
+        <dd id="endpoint"></dd>
+        <dt>Credentials</dt>
+        <dd>include</dd>
+        <dt>Status</dt>
+        <dd id="status">Waiting</dd>
+      </dl>
+
+      <pre id="output" aria-live="polite"></pre>
+    </main>
+
+    <script>
+      const endpoint =
+        "https://webcast.tiktok.com/webcast/wallet_api_tiktok/app_to_web/check_login";
+      const endpointEl = document.querySelector("#endpoint");
+      const statusEl = document.querySelector("#status");
+      const outputEl = document.querySelector("#output");
+      const buttonEl = document.querySelector("#runFetch");
+      const buttonWithHeadersEl = document.querySelector("#runFetchWithHeaders");
+
+      endpointEl.textContent = endpoint;
+
+      async function runFetch(options = {}) {
+        statusEl.textContent = "Fetching";
+        outputEl.textContent = "";
+        buttonEl.disabled = true;
+        buttonWithHeadersEl.disabled = true;
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "GET",
+            credentials: "include",
+            ...options,
+          });
+          const text = await response.text();
+
+          statusEl.textContent =
+            `${response.status} ${response.statusText || ""}`.trim();
+          outputEl.textContent = text || "(empty response body)";
+        } catch (error) {
+          statusEl.textContent = "Fetch failed";
+          outputEl.textContent =
+            error instanceof Error
+              ? error.stack || error.message
+              : String(error);
+        } finally {
+          buttonEl.disabled = false;
+          buttonWithHeadersEl.disabled = false;
+        }
+      }
+
+      buttonEl.addEventListener("click", runFetch);
+      buttonWithHeadersEl.addEventListener("click", () => {
+        runFetch({
+          headers: {
+            "X-USE-PPE": "1",
+            "x-tt-env": "ppe_a2w_localhost_2",
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
