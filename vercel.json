@@ -2,6 +2,10 @@
   "rewrites": [
     { "source": "/aswebauth", "destination": "/api/aswebauth" },
     { "source": "/aswebauth/start", "destination": "/api/aswebauth/start" },
-    { "source": "/aswebauth/check", "destination": "/api/aswebauth/check" }
+    { "source": "/aswebauth/check", "destination": "/api/aswebauth/check" },
+    { "source": "/handoff/start", "destination": "/api/handoff/start" },
+    { "source": "/handoff/approve", "destination": "/api/handoff/approve" },
+    { "source": "/handoff/complete", "destination": "/api/handoff/complete" },
+    { "source": "/handoff/check", "destination": "/api/handoff/check" }
   ]
 }

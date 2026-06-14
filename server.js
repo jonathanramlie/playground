@@ -8,6 +8,13 @@ const {
   renderCheckPage,
   renderLandingPage,
 } = require('./src/aswebauth');
+const {
+  buildApproveResponse,
+  buildCheckResponse,
+  buildCompleteResponse,
+  buildHandoffStartResponse,
+  getHandoffSecret,
+} = require('./src/handoff');
 
 const PORT = Number(process.env.PORT || 5173);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -30,6 +37,29 @@ function writeHtml(res, body) {
     'cache-control': 'no-store',
   });
   res.end(body);
+}
+
+function writeResponse(res, response) {
+  res.writeHead(response.statusCode, response.headers);
+  res.end(response.body);
+}
+
+async function readJsonBody(req) {
+  const chunks = [];
+
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+
+  if (chunks.length === 0) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch (_error) {
+    return {};
+  }
 }
 
 async function serveStatic(fileName, res) {
@@ -75,6 +105,56 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname === '/handoff/start') {
+      writeResponse(
+        res,
+        buildHandoffStartResponse({
+          secret: getHandoffSecret(),
+          secure: isSecureRequest(req),
+          origin: url.origin,
+        }),
+      );
+      return;
+    }
+
+    if (url.pathname === '/handoff/approve') {
+      const body = await readJsonBody(req);
+      writeResponse(
+        res,
+        buildApproveResponse({
+          secret: getHandoffSecret(),
+          tx: body.tx,
+          nativeUser: body.nativeUser || 'demo-native-user',
+          origin: url.origin,
+        }),
+      );
+      return;
+    }
+
+    if (url.pathname === '/handoff/complete') {
+      writeResponse(
+        res,
+        buildCompleteResponse({
+          secret: getHandoffSecret(),
+          secure: isSecureRequest(req),
+          approval: url.searchParams.get('approval'),
+          cookieHeader: req.headers.cookie || '',
+        }),
+      );
+      return;
+    }
+
+    if (url.pathname === '/handoff/check') {
+      writeResponse(
+        res,
+        buildCheckResponse({
+          secret: getHandoffSecret(),
+          cookieHeader: req.headers.cookie || '',
+        }),
+      );
+      return;
+    }
+
     const fileName = routes.get(url.pathname);
 
     if (!fileName) {
@@ -94,4 +174,5 @@ server.listen(PORT, HOST, () => {
   console.log(`playground-web listening at http://${HOST}:${PORT}`);
   console.log(`Credential include PoC: http://${HOST}:${PORT}/poc-cred-include`);
   console.log(`ASWebAuthenticationSession PoC: http://${HOST}:${PORT}/aswebauth`);
+  console.log(`Browser-owned handoff PoC: http://${HOST}:${PORT}/handoff/start`);
 });
