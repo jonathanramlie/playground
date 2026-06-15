@@ -1,5 +1,5 @@
 function getOrigin(req) {
-  const host = req.headers.host || 'playground-211p.vercel.app';
+  const host = req.headers.host || 'playground-beige-ten.vercel.app';
   return `https://${host}`;
 }
 

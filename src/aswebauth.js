@@ -141,7 +141,7 @@ function page(title, body) {
 </html>`;
 }
 
-function renderLandingPage({ origin = 'https://playground-211p.vercel.app' } = {}) {
+function renderLandingPage({ origin = 'https://playground-beige-ten.vercel.app' } = {}) {
   return page(
     'ASWebAuthenticationSession Cookie POC',
     `<h1>ASWebAuthenticationSession Cookie POC</h1>

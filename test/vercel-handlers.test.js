@@ -22,7 +22,7 @@ test('landing handler renders https check URL for Vercel host', () => {
   handler(
     {
       headers: {
-        host: 'playground-211p.vercel.app',
+        host: 'playground-beige-ten.vercel.app',
         'x-forwarded-proto': 'http',
       },
     },
@@ -30,8 +30,8 @@ test('landing handler renders https check URL for Vercel host', () => {
   );
 
   assert.equal(res.statusCode, 200);
-  assert.match(res.body, /https:\/\/playground-211p\.vercel\.app\/aswebauth\/check\?expected=/);
-  assert.doesNotMatch(res.body, /http:\/\/playground-211p\.vercel\.app\/aswebauth\/check\?expected=/);
+  assert.match(res.body, /https:\/\/playground-beige-ten\.vercel\.app\/aswebauth\/check\?expected=/);
+  assert.doesNotMatch(res.body, /http:\/\/playground-beige-ten\.vercel\.app\/aswebauth\/check\?expected=/);
 });
 
 test('start handler redirects to callback and sets nonce cookie', () => {

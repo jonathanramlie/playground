@@ -18,7 +18,7 @@ test('buildHandoffStartResponse creates browser-owned pending cookie and app app
     secure: true,
     now,
     tx: 'tx-123',
-    origin: 'https://playground-211p.vercel.app',
+    origin: 'https://playground-beige-ten.vercel.app',
   });
 
   assert.equal(response.statusCode, 200);
@@ -42,7 +42,7 @@ test('buildHandoffStartResponse can auto-open the app with fallback button', () 
     secure: true,
     now,
     tx: 'tx-auto',
-    origin: 'https://playground-211p.vercel.app',
+    origin: 'https://playground-beige-ten.vercel.app',
     autoOpen: true,
   });
 
@@ -59,14 +59,14 @@ test('buildApproveResponse returns an approval-bound complete URL', () => {
     now,
     tx: 'tx-123',
     nativeUser: 'demo-user',
-    origin: 'https://playground-211p.vercel.app',
+    origin: 'https://playground-beige-ten.vercel.app',
   });
 
   assert.equal(response.statusCode, 200);
   assert.equal(response.headers['content-type'], 'application/json; charset=utf-8');
 
   const body = JSON.parse(response.body);
-  assert.match(body.completeUrl, /^https:\/\/playground-211p\.vercel\.app\/handoff\/complete\?approval=/);
+  assert.match(body.completeUrl, /^https:\/\/playground-beige-ten\.vercel\.app\/handoff\/complete\?approval=/);
 
   const approval = new URL(body.completeUrl).searchParams.get('approval');
   const payload = verifySignedToken(approval, secret);

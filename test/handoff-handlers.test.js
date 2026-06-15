@@ -21,7 +21,7 @@ test('handoff start handler sets pending cookie and renders app approval link', 
 
   handler(
     {
-      headers: { host: 'playground-211p.vercel.app' },
+      headers: { host: 'playground-beige-ten.vercel.app' },
     },
     res,
   );
@@ -39,7 +39,7 @@ test('handoff start handler supports autoOpen mode', () => {
   handler(
     {
       query: { autoOpen: '1' },
-      headers: { host: 'playground-211p.vercel.app' },
+      headers: { host: 'playground-beige-ten.vercel.app' },
     },
     res,
   );
@@ -58,7 +58,7 @@ test('handoff approve handler returns complete URL', () => {
     {
       method: 'POST',
       body: { tx: 'tx-123', nativeUser: 'demo-user' },
-      headers: { host: 'playground-211p.vercel.app' },
+      headers: { host: 'playground-beige-ten.vercel.app' },
     },
     res,
   );
@@ -67,7 +67,7 @@ test('handoff approve handler returns complete URL', () => {
   assert.equal(res.headers['content-type'], 'application/json; charset=utf-8');
 
   const body = JSON.parse(res.body);
-  assert.match(body.completeUrl, /^https:\/\/playground-211p\.vercel\.app\/handoff\/complete\?approval=/);
+  assert.match(body.completeUrl, /^https:\/\/playground-beige-ten\.vercel\.app\/handoff\/complete\?approval=/);
 });
 
 test('handoff complete handler rejects missing pending cookie', () => {
@@ -79,7 +79,7 @@ test('handoff complete handler rejects missing pending cookie', () => {
     {
       method: 'POST',
       body: { tx: 'tx-123', nativeUser: 'demo-user' },
-      headers: { host: 'playground-211p.vercel.app' },
+      headers: { host: 'playground-beige-ten.vercel.app' },
     },
     approveRes,
   );

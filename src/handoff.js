@@ -3,7 +3,7 @@ const crypto = require('node:crypto');
 const CALLBACK_SCHEME = 'playgroundauth';
 const HANDOFF_PENDING_COOKIE = 'handoff_pending';
 const SAFARI_SESSION_COOKIE = 'safari_session';
-const DEFAULT_ORIGIN = 'https://playground-211p.vercel.app';
+const DEFAULT_ORIGIN = 'https://playground-beige-ten.vercel.app';
 const DEFAULT_TTL_SECONDS = 300;
 
 function createTx() {

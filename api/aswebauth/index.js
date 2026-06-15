@@ -1,7 +1,7 @@
 const { renderLandingPage } = require('../../src/aswebauth');
 
 module.exports = function handler(req, res) {
-  const host = req.headers.host || 'playground-211p.vercel.app';
+  const host = req.headers.host || 'playground-beige-ten.vercel.app';
 
   res.statusCode = 200;
   res.setHeader('content-type', 'text/html; charset=utf-8');

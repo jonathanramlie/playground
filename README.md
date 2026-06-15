@@ -23,21 +23,21 @@ Local HTTP intentionally omits the `Secure` cookie attribute for `/aswebauth/sta
 Deploy this project to the domain:
 
 ```text
-https://playground-211p.vercel.app
+https://playground-beige-ten.vercel.app
 ```
 
 The clean POC URLs are:
 
-- https://playground-211p.vercel.app/aswebauth
-- https://playground-211p.vercel.app/aswebauth/start
-- https://playground-211p.vercel.app/aswebauth/start?delayMs=2000
-- https://playground-211p.vercel.app/aswebauth/start?autoRedirect=0
-- https://playground-211p.vercel.app/aswebauth/check?expected=<nonce>
-- https://playground-211p.vercel.app/handoff/start
-- https://playground-211p.vercel.app/handoff/start?autoOpen=1
-- https://playground-211p.vercel.app/handoff/complete?approval=<signed-approval>
-- https://playground-211p.vercel.app/handoff/check
-- https://playground-211p.vercel.app/android-token/receive
+- https://playground-beige-ten.vercel.app/aswebauth
+- https://playground-beige-ten.vercel.app/aswebauth/start
+- https://playground-beige-ten.vercel.app/aswebauth/start?delayMs=2000
+- https://playground-beige-ten.vercel.app/aswebauth/start?autoRedirect=0
+- https://playground-beige-ten.vercel.app/aswebauth/check?expected=<nonce>
+- https://playground-beige-ten.vercel.app/handoff/start
+- https://playground-beige-ten.vercel.app/handoff/start?autoOpen=1
+- https://playground-beige-ten.vercel.app/handoff/complete?approval=<signed-approval>
+- https://playground-beige-ten.vercel.app/handoff/check
+- https://playground-beige-ten.vercel.app/android-token/receive
 
 ## ASWebAuthenticationSession cookie POC
 
