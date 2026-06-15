@@ -14,8 +14,9 @@ Open:
 - http://127.0.0.1:5173/
 - http://127.0.0.1:5173/aswebauth
 - http://127.0.0.1:5173/handoff/start
+- http://127.0.0.1:5173/android-token/receive
 
-Local HTTP intentionally omits the `Secure` cookie attribute for `/aswebauth/start` and `/handoff/start` because browsers do not store Secure cookies from plain HTTP.
+Local HTTP intentionally omits the `Secure` cookie attribute for `/aswebauth/start`, `/handoff/start`, and `/android-token/receive` because browsers do not store Secure cookies from plain HTTP.
 
 ## Vercel deployment
 
@@ -36,6 +37,7 @@ The clean POC URLs are:
 - https://playground-211p.vercel.app/handoff/start?autoOpen=1
 - https://playground-211p.vercel.app/handoff/complete?approval=<signed-approval>
 - https://playground-211p.vercel.app/handoff/check
+- https://playground-211p.vercel.app/android-token/receive
 
 ## ASWebAuthenticationSession cookie POC
 
@@ -76,3 +78,15 @@ Flow:
 This means an attacker-created approval URL should fail in a victim browser that does not have the matching pending cookie.
 
 For production, replace the demo native user field with real app authentication, use a strong `HANDOFF_SECRET`, keep tokens short-lived and single-use if backed by storage, and add account-switch confirmation when Safari already has a different logged-in user.
+
+## Android token carryover POC
+
+`/android-token/receive` accepts a POST form body containing `nonce=<uuid>`, sets a browser-readable cookie, and returns a page that displays the cookie via client-side JavaScript.
+
+```http
+Set-Cookie: android_nonce=<uuid>; Path=/; Max-Age=600; SameSite=Lax; Secure
+```
+
+The paired Android POC serves a loopback HTML page at `http://127.0.0.1:<port>/handoff`. That local page embeds the nonce in a JSON script tag and auto-submits it to the deployed `/android-token/receive` endpoint with a POST form.
+
+The cookie is intentionally not `HttpOnly` because the POC page must prove the browser can read and display the cookie from `document.cookie` without SSR.

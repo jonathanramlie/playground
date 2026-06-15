@@ -9,6 +9,11 @@ const {
   renderLandingPage,
 } = require('./src/aswebauth');
 const {
+  buildMethodNotAllowedResponse: buildAndroidTokenMethodNotAllowedResponse,
+  buildReceiveResponse: buildAndroidTokenReceiveResponse,
+  parseRequestBody: parseAndroidTokenRequestBody,
+} = require('./src/android-token');
+const {
   buildApproveResponse,
   buildCheckResponse,
   buildCompleteResponse,
@@ -44,7 +49,7 @@ function writeResponse(res, response) {
   res.end(response.body);
 }
 
-async function readJsonBody(req) {
+async function readBodyText(req) {
   const chunks = [];
 
   for await (const chunk of req) {
@@ -52,14 +57,28 @@ async function readJsonBody(req) {
   }
 
   if (chunks.length === 0) {
+    return '';
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function readJsonBody(req) {
+  const rawBody = await readBodyText(req);
+
+  if (!rawBody) {
     return {};
   }
 
   try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return JSON.parse(rawBody);
   } catch (_error) {
     return {};
   }
+}
+
+async function readFormBody(req) {
+  return parseAndroidTokenRequestBody(await readBodyText(req));
 }
 
 async function serveStatic(fileName, res) {
@@ -156,6 +175,23 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname === '/android-token/receive') {
+      if (req.method !== 'POST') {
+        writeResponse(res, buildAndroidTokenMethodNotAllowedResponse());
+        return;
+      }
+
+      const body = await readFormBody(req);
+      writeResponse(
+        res,
+        buildAndroidTokenReceiveResponse({
+          nonce: body.nonce,
+          secure: isSecureRequest(req),
+        }),
+      );
+      return;
+    }
+
     const fileName = routes.get(url.pathname);
 
     if (!fileName) {
@@ -176,4 +212,5 @@ server.listen(PORT, HOST, () => {
   console.log(`Credential include PoC: http://${HOST}:${PORT}/poc-cred-include`);
   console.log(`ASWebAuthenticationSession PoC: http://${HOST}:${PORT}/aswebauth`);
   console.log(`Browser-owned handoff PoC: http://${HOST}:${PORT}/handoff/start`);
+  console.log(`Android token carryover POC: http://${HOST}:${PORT}/android-token/receive`);
 });
